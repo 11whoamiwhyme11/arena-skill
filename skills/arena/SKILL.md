@@ -95,6 +95,32 @@ Leave out `--baseline-file` when there is nothing to beat, and `--seed` to get a
 copies the task into the run folder, deals every competitor a different strategy card with no
 repeats, pairs round 1, and writes `arena.json`.
 
+## Google Antigravity Subagent Execution Protocol
+
+When running inside **Google Antigravity**, subagents are spawned using the `invoke_subagent` tool call instead of Claude Code's `Task`/`Agent` tool.
+
+### Subagent Tool Arguments:
+* `Model`: `"flash_lite"` (Crucial: lightning-fast 3-5 second turnaround, ultra-low token cost for high-concurrency rounds).
+* `TypeName`: `"self"` (Ensures the subagent inherits file read/write and command execution tools).
+* `Role`: `"arena <job_id>"` (e.g. `arena a003.spawn`, `arena r1-m01.a013.attack`, `arena r1-m01.a013.defend`, `arena r1-m01.judge`).
+* `Workspace`: `"inherit"` (Operates directly in the project workspace without creating isolated branches).
+* `Prompt`: `"Read <prompt_path> and follow it exactly. It is your whole brief."`
+
+### Reactive Wakeup & Wave Orchestration:
+* **Batching**: Launch up to 10 `invoke_subagent` calls in a single turn.
+* **No Polling**: Antigravity automatically awakens the orchestrator with high-priority system messages when subagents complete (`DONE`, `ATTACKED`, `DEFENDED`, or `WINNER`). End the turn after dispatching the batch.
+* **Status Monitoring**: If needed, monitor file output counts in `.arena/<run>/r<N>/` using quick PowerShell or Python checks.
+
+### Output File Conventions (Required by bracket.py):
+* **Spawn**: `.arena/<run>/r0/<agent_id>.md` (Standalone solution).
+* **Attack**: `.arena/<run>/r<N>/<mid>.<attacker>.attack.md` (Singular `.attack.md`, not `attacks.md`).
+* **Defend**:
+  - Point-by-point defense: `.arena/<run>/r<N>/<mid>.<agent_id>.defense.md`
+  - Revised solution: `.arena/<run>/r<N>/<mid>.<agent_id>.solution.md` (Crucial: `bracket.py` checks for `.solution.md`).
+* **Judge**: `.arena/<run>/r<N>/<mid>.verdict.json` (Valid JSON with scores, winner, reason, survived, standing).
+* **Collect & Advance**: Run `python bracket.py collect` to ingest verdicts, then `python bracket.py advance` to advance survivors and eliminate losers.
+
+
 ## Step 4: the loop
 
 Always drive it with `ARENA next`. It reads the state on disk and tells you the next step and the

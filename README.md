@@ -47,6 +47,14 @@ folder into your repo's `.claude/skills/`.
 It needs Claude Code, because it spawns sub-agents with the Agent tool, and Python 3.8 or newer.
 Nothing to pip install.
 
+## Google Antigravity & Agentic IDE Support
+
+This edition includes native support for **Google Antigravity** via the Antigravity Subagent Execution Protocol:
+- **Fast Turnaround Subagents**: Spawns concurrent subagents via invoke_subagent using flash_lite (ultra-low token cost and sub-5s response latency).
+- **Reactive Wake-Up Architecture**: Eliminates polling loops; Antigravity resumes execution automatically when subagents complete (DONE, ATTACKED, DEFENDED, or WINNER).
+- **File System Conventions**: Enforces atomic state persistence inside .arena/<run>/ compatible with bracket.py collection and tournament progression.
+
+
 ## Use it
 
 ```
